@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using tag_news.Data;
+using tag_news.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +8,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("PostgresConnection")));
 
+// Registrar serviços
+builder.Services.AddScoped<ITagService, TagService>();
+builder.Services.AddScoped<INoticiaService, NoticiaService>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
