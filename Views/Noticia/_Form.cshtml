@@ -6,19 +6,19 @@
         <input type="hidden" asp-for="Id" />
     }
     
-    <div class="form-group">
-        <label asp-for="Titulo">Título</label>
+    <div class="form-group mb-3">
+        <label asp-for="Titulo" class="form-label"></label>
         <input asp-for="Titulo" class="form-control" />
         <span asp-validation-for="Titulo" class="text-danger"></span>
     </div>
 
-    <div class="form-group">
-        <label asp-for="Texto">Texto</label>
-        <textarea asp-for="Texto" class="form-control"></textarea>
+    <div class="form-group mb-3">
+        <label asp-for="Texto" class="form-label"></label>
+        <textarea asp-for="Texto" class="form-control" rows="5"></textarea>
         <span asp-validation-for="Texto" class="text-danger"></span>
     </div>
 
-    <div class="form-group">
+    <div class="form-group mb-3">
         <label>Tags</label>
         <div class="row">
             @foreach (var tag in ViewBag.Tags)
@@ -39,6 +39,8 @@
             }
         </div>
     </div>
-    <br />
+
+    <div class="alert alert-danger d-none" id="validationErrors"></div>
+
     <button type="submit" class="btn btn-primary">Salvar</button>
 </form> 
