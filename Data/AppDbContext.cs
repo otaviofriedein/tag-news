@@ -30,7 +30,9 @@ namespace tag_news.Data
                 entity.Property(e => e.Texto).IsRequired();
                 entity.HasOne(e => e.Usuario)
                       .WithMany(u => u.Noticias)
-                      .HasForeignKey(e => e.UsuarioId);
+                      .HasForeignKey(e => e.UsuarioId)
+                      .IsRequired(false)
+                      .OnDelete(DeleteBehavior.SetNull);
             });
 
             modelBuilder.Entity<Tag>(entity =>
