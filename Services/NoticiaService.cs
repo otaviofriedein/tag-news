@@ -1,127 +1,106 @@
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using tag_news.Data;
 using tag_news.Models;
+using tag_news.Repositories;
+using tag_news.Repositories.Interfaces;
+using tag_news.Services.Intefaces;
+using tag_news.Shared;
+using tag_news.ViewModels;
 
 namespace tag_news.Services
 {
     public class NoticiaService : INoticiaService
     {
-        private readonly AppDbContext _context;
+        private readonly INoticiaRepository _noticiaRepository;
+        private readonly IMapper _mapper;
 
-        public NoticiaService(AppDbContext context)
+        public NoticiaService(INoticiaRepository noticiaRepository, IMapper mapper)
         {
-            _context = context;
+            _noticiaRepository = noticiaRepository;
+            _mapper = mapper;
         }
 
-        public async Task<IEnumerable<Noticia>> GetAllAsync()
+        public async Task<ServiceResult<IEnumerable<NoticiaViewModel>>> GetAllAsync()
         {
-            return await _context.Noticias
-                .Include(n => n.Usuario)
-                .Include(n => n.NoticiaTags)
-                    .ThenInclude(nt => nt.Tag)
-                .ToListAsync();
+            var noticias = await _noticiaRepository.GetAllAsync();
+
+            var result = _mapper.Map<IEnumerable<NoticiaViewModel>>(noticias);
+
+            return ServiceResult<IEnumerable<NoticiaViewModel>>.Ok(result);
         }
 
-        public async Task<Noticia?> GetByIdAsync(int id)
+        public async Task<ServiceResult<NoticiaViewModel>> GetByIdAsync(int id)
         {
-            return await _context.Noticias
-                .Include(n => n.NoticiaTags)
-                .FirstOrDefaultAsync(n => n.Id == id);
+            var noticia = await _noticiaRepository.GetByIdAsync(id);
+
+            if (noticia == null) return ServiceResult<NoticiaViewModel>.NaoEncontrado();
+
+            var result = _mapper.Map<NoticiaViewModel>(noticia);
+
+            return ServiceResult<NoticiaViewModel>.Ok(result);
         }
 
-        public async Task<(bool success, string message)> CreateAsync(NoticiaViewModel model)
+        public async Task<ServiceResult<NoticiaViewModel>> CreateAsync(NoticiaViewModel model)
         {
-            try
+            var noticia = _mapper.Map<Noticia>(model);
+
+            noticia.NoticiaTags = model.TagIds?.Select(tagId => new NoticiaTag { TagId = tagId }).ToList() ?? [];
+
+            var noticiaDb = _noticiaRepository.CreateAsync(noticia);
+
+            var result = _mapper.Map<NoticiaViewModel>(noticiaDb);
+
+            return ServiceResult<NoticiaViewModel>.Ok(result);
+        }
+
+        public async Task<ServiceResult<NoticiaViewModel>> UpdateAsync(int id, NoticiaViewModel model)
+        {
+            var noticiaDb = await _noticiaRepository.GetByIdAsync(id);
+
+            if (noticiaDb == null) return ServiceResult<NoticiaViewModel>.NaoEncontrado();
+
+            noticiaDb.Titulo = model.Titulo;
+            noticiaDb.Texto = model.Texto;
+            noticiaDb.UsuarioId = model.UsuarioId;
+
+            // Atualizar tags
+            noticiaDb.NoticiaTags.Clear();
+            foreach (var tagId in model.TagIds ?? [])
             {
-                var noticia = new Noticia
-                {
-                    Titulo = model.Titulo,
-                    Texto = model.Texto,
-                    UsuarioId = model.UsuarioId,
-                    NoticiaTags = model.TagIds?.Select(tagId => new NoticiaTag { TagId = tagId }).ToList() ?? new List<NoticiaTag>()
-                };
-
-                _context.Add(noticia);
-                await _context.SaveChangesAsync();
-                return (true, "Notícia criada com sucesso.");
+                noticiaDb.NoticiaTags.Add(new NoticiaTag { TagId = tagId });
             }
-            catch (Exception ex)
+
+            var noticiaUpdated = _noticiaRepository.UpdateAsync(noticiaDb);
+
+            var result = _mapper.Map<NoticiaViewModel>(noticiaUpdated);
+            return ServiceResult<NoticiaViewModel>.Ok(result);
+        }
+
+        public async Task<ServiceResult<bool>> DeleteAsync(int id)
+        {
+            var noticiaDb = await _noticiaRepository.GetByIdAsync(id);
+
+            if (noticiaDb == null) return ServiceResult<bool>.NaoEncontrado();
+
+            if (await _noticiaRepository.DeleteAsync(noticiaDb))
             {
-                return (false, $"Erro ao criar notícia: {ex.Message}");
+                return ServiceResult<bool>.Ok(true);
             }
-        }
-
-        public async Task<(bool success, string message)> UpdateAsync(int id, NoticiaViewModel model)
-        {
-            try
+            else
             {
-                var noticia = await _context.Noticias
-                    .Include(n => n.NoticiaTags)
-                    .FirstOrDefaultAsync(n => n.Id == id);
-
-                if (noticia == null)
-                {
-                    return (false, "Notícia não encontrada.");
-                }
-
-                noticia.Titulo = model.Titulo;
-                noticia.Texto = model.Texto;
-                noticia.UsuarioId = model.UsuarioId;
-
-                // Atualizar tags
-                noticia.NoticiaTags.Clear();
-                foreach (var tagId in model.TagIds ?? new List<int>())
-                {
-                    noticia.NoticiaTags.Add(new NoticiaTag { TagId = tagId });
-                }
-
-                await _context.SaveChangesAsync();
-                return (true, "Notícia atualizada com sucesso.");
-            }
-            catch (Exception ex)
-            {
-                return (false, $"Erro ao atualizar notícia: {ex.Message}");
-            }
+                return ServiceResult<bool>.Erro("Ocorreu um erro ao excluir");
+            }           
         }
-
-        public async Task<(bool success, string message)> DeleteAsync(int id)
+             
+        public async Task<ServiceResult<IEnumerable<TagViewModel>>> GetAllTagsAsync()
         {
-            try
-            {
-                var noticia = await _context.Noticias.FindAsync(id);
-                if (noticia == null)
-                {
-                    return (false, "Notícia não encontrada.");
-                }
+            var tags = await _noticiaRepository.GetAllTagsAsync();
 
-                _context.Noticias.Remove(noticia);
-                await _context.SaveChangesAsync();
-                return (true, "Notícia excluída com sucesso.");
-            }
-            catch (Exception ex)
-            {
-                return (false, $"Erro ao excluir notícia: {ex.Message}");
-            }
-        }
+            var result = _mapper.Map<IEnumerable<TagViewModel>>(tags);
 
-        public async Task<bool> ExistsAsync(int id)
-        {
-            return await _context.Noticias.AnyAsync(e => e.Id == id);
-        }
-
-        public async Task<IEnumerable<Tag>> GetAllTagsAsync()
-        {
-            return await _context.Tags.ToListAsync();
-        }
-
-        public Task<bool> CreateAsync(Noticia model)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> UpdateAsync(Noticia model)
-        {
-            throw new NotImplementedException();
-        }
+            return ServiceResult<IEnumerable<TagViewModel>>.Ok(result);
+        }       
     }
 } 

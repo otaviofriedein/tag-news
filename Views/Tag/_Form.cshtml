@@ -1,4 +1,4 @@
-@model Tag
+@model TagViewModel
 
 <form asp-action="@(Model.Id == 0 ? "Create" : "Edit")">
     @if (Model.Id != 0)

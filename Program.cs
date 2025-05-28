@@ -1,6 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using tag_news.Data;
+using tag_news.Mappings;
+using tag_news.Repositories;
+using tag_news.Repositories.Interfaces;
 using tag_news.Services;
+using tag_news.Services.Intefaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,8 +13,14 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("PostgresConnection")));
 
 // Registrar serviços
+builder.Services.AddScoped<ITagRepository, TagRepository>();
+builder.Services.AddScoped<INoticiaRepository, NoticiaRepository>();
 builder.Services.AddScoped<ITagService, TagService>();
 builder.Services.AddScoped<INoticiaService, NoticiaService>();
+
+// Registra o AutoMapper e escaneia automaticamente os Profiles
+builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
+
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

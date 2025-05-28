@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using tag_news.Models;
 using tag_news.Services;
+using tag_news.Services.Intefaces;
+using tag_news.ViewModels;
 
 namespace tag_news.Controllers
 {
@@ -13,77 +14,69 @@ namespace tag_news.Controllers
             _tagService = tagService;
         }
 
-        // GET: Tag
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
-            return View(await _tagService.GetAllAsync());
+            var result = await _tagService.GetAllAsync();
+
+            return View(result.Dados);
         }
 
-        // GET: Tag/Create
+        [HttpGet]
         public IActionResult Create()
         {
-            return View(new Tag());
+            return View(new TagViewModel());
         }
 
-        // POST: Tag/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Descricao")] Tag tag)
+        public async Task<IActionResult> Create([Bind("Descricao")] TagViewModel tag)
         {
-            if (!ModelState.IsValid)
-            {
-                return View(tag);
-            }
+            if (!ModelState.IsValid) return View(tag);
 
-            if (await _tagService.CreateAsync(tag))
-            {
-                return RedirectToAction(nameof(Index));
-            }
+            var result = await _tagService.CreateAsync(tag);
 
-            return View(tag);
+            if (!result.Sucesso) return View(tag);
+
+            return RedirectToAction(nameof(Index));
         }
 
-        // GET: Tag/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
         {
-            if (id == null) return NotFound();
+            var result = await _tagService.GetByIdAsync(id);
 
-            var tag = await _tagService.GetByIdAsync(id.Value);
-            if (tag == null) return NotFound();
+            if (result.StatusCode == StatusCodes.Status404NotFound) return NotFound();
 
-            return View(tag);
+            return View(result.Dados);
         }
 
-        // POST: Tag/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Descricao")] Tag tag)
-        {
-            if (id != tag.Id) return NotFound();
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Descricao")] TagViewModel tag)
+        {            
+            if (!ModelState.IsValid) return View(tag);
 
-            if (!ModelState.IsValid)
-            {
-                return View(tag);
-            }
+            var result = await _tagService.UpdateAsync(id, tag);
 
-            if (await _tagService.UpdateAsync(tag))
-            {
-                return RedirectToAction(nameof(Index));
-            }
+            if (result.StatusCode == StatusCodes.Status404NotFound) return NotFound();
 
-            return View(tag);
+            if (!result.Sucesso) return View(tag);
+
+            return RedirectToAction(nameof(Index));
         }
 
-        // POST: Tag/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var (success, message) = await _tagService.DeleteAsync(id);
+            var result = await _tagService.DeleteAsync(id);
 
-            if (!success)
+            if (result.StatusCode == StatusCodes.Status404NotFound) return NotFound();
+
+            if (!result.Sucesso)
             {
-                TempData["ErrorMessage"] = message;
+                TempData["ErrorMessage"] = result.Mensagem;
             }
 
             return RedirectToAction(nameof(Index));

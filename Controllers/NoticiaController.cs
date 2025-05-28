@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using tag_news.Services;
+using tag_news.Services.Intefaces;
+using tag_news.Shared;
+using tag_news.ViewModels;
 
 namespace tag_news.Controllers
 {
@@ -12,78 +14,85 @@ namespace tag_news.Controllers
             _noticiaService = noticiaService;
         }
 
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
-            return View(await _noticiaService.GetAllAsync());
+            var result = await _noticiaService.GetAllAsync();
+
+            return View(result.Dados);
         }
 
+        [HttpGet]
         public async Task<IActionResult> Create()
         {
-            ViewBag.Tags = await _noticiaService.GetAllTagsAsync();
-            return View(new NoticiaViewModel { TagIds = new List<int>() });
+            var resultTags = await _noticiaService.GetAllTagsAsync();
+
+            ViewBag.Tags = resultTags.Dados;
+            return View(new NoticiaViewModel());
         }
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] NoticiaViewModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                return Json(new { success = false, errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList() });
-            }
+            if (!ModelState.IsValid) return RetornarErrosModelState();            
 
-            var (success, message) = await _noticiaService.CreateAsync(model);
-            return Json(new { success, message });
+            var result = await _noticiaService.CreateAsync(model);
+
+            if (!result.Sucesso) return Json(ServiceResult<NoticiaViewModel>.FalhaNegocial(result.Mensagem));
+
+            return Json(ServiceResult<NoticiaViewModel>.Ok(result.Dados));
         }
 
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null) return NotFound();
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {            
+            var result = await _noticiaService.GetByIdAsync(id);
 
-            var noticia = await _noticiaService.GetByIdAsync(id.Value);
-            if (noticia == null) return NotFound();
+            if (result.StatusCode == StatusCodes.Status404NotFound) return NotFound();
 
-            var viewModel = new NoticiaViewModel
-            {
-                Id = noticia.Id,
-                Titulo = noticia.Titulo,
-                Texto = noticia.Texto,
-                UsuarioId = noticia.UsuarioId,
-                TagIds = noticia.NoticiaTags.Select(nt => nt.TagId).ToList()
-            };
+            var resultTags = await _noticiaService.GetAllTagsAsync();
+            ViewBag.Tags = resultTags.Dados;
 
-            ViewBag.Tags = await _noticiaService.GetAllTagsAsync();
-            return View(viewModel);
+            return View(result.Dados);
         }
 
         [HttpPost]
         public async Task<IActionResult> Edit(int id, [FromBody] NoticiaViewModel model)
         {
-            if (id != model.Id)
-            {
-                return Json(new { success = false, message = "ID inválido." });
-            }
+            if (!ModelState.IsValid) return RetornarErrosModelState();            
 
-            if (!ModelState.IsValid)
-            {
-                return Json(new { success = false, errors = ModelState.Values.SelectMany(v => v.Errors) });
-            }
+            var result = await _noticiaService.UpdateAsync(id, model);
 
-            var (success, message) = await _noticiaService.UpdateAsync(id, model);
-            return Json(new { success, message });
+            if (result.StatusCode == StatusCodes.Status404NotFound) 
+                return Json(ServiceResult<NoticiaViewModel>.NaoEncontrado());
+
+            if (!result.Sucesso) return Json(ServiceResult<NoticiaViewModel>.FalhaNegocial(result.Mensagem));
+
+            return Json(ServiceResult<NoticiaViewModel>.Ok(result.Dados));
         }
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var (success, message) = await _noticiaService.DeleteAsync(id);
-            
-            if (!success)
-            {
-                TempData["ErrorMessage"] = message;
-            }
+            var result = await _noticiaService.DeleteAsync(id);
+
+            if (result.StatusCode == StatusCodes.Status404NotFound) return NotFound();
+                 
+            if (!result.Sucesso) return BadRequest();
 
             return RedirectToAction(nameof(Index));
+
+        }
+
+        private JsonResult RetornarErrosModelState()
+        {
+            var erros = string.Join(Environment.NewLine, ModelState.Values
+                                                               .SelectMany(v => v.Errors)
+                                                               .Select(e => e.ErrorMessage)
+             );
+
+            return Json(ServiceResult<NoticiaViewModel>.FalhaNegocial(erros));
         }
     }
 }

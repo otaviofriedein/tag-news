@@ -8,6 +8,6 @@ namespace tag_news.Models
         public int? UsuarioId { get; set; }
 
         public Usuario? Usuario { get; set; }
-        public ICollection<NoticiaTag> NoticiaTags { get; set; } = new List<NoticiaTag>();
+        public ICollection<NoticiaTag> NoticiaTags { get; set; } = [];
     }
 }

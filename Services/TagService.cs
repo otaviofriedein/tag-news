@@ -1,84 +1,84 @@
-using Microsoft.EntityFrameworkCore;
-using tag_news.Data;
+using AutoMapper;
 using tag_news.Models;
+using tag_news.Repositories.Interfaces;
+using tag_news.Services.Intefaces;
+using tag_news.Shared;
+using tag_news.ViewModels;
 
 namespace tag_news.Services
 {
     public class TagService : ITagService
     {
-        private readonly AppDbContext _context;
+        private readonly ITagRepository _tagRepository;
+        private readonly IMapper _mapper;
 
-        public TagService(AppDbContext context)
+        public TagService(ITagRepository tagRepository, IMapper mapper)
         {
-            _context = context;
+            _tagRepository = tagRepository;
+            _mapper = mapper;
         }
 
-        public async Task<IEnumerable<Tag>> GetAllAsync()
+        public async Task<ServiceResult<IEnumerable<TagViewModel>>> GetAllAsync()
         {
-            return await _context.Tags.ToListAsync();
+            var tags = await _tagRepository.GetAllAsync();
+
+            var result = _mapper.Map<IEnumerable<TagViewModel>>(tags);
+
+            return ServiceResult<IEnumerable<TagViewModel>>.Ok(result);
         }
 
-        public async Task<Tag?> GetByIdAsync(int id)
+        public async Task<ServiceResult<TagViewModel>?> GetByIdAsync(int id)
         {
-            return await _context.Tags.FindAsync(id);
+            var tag = await _tagRepository.GetByIdAsync(id);
+
+            if (tag == null) return ServiceResult<TagViewModel>.NaoEncontrado();
+
+            var result = _mapper.Map<TagViewModel>(tag);
+
+            return ServiceResult<TagViewModel>.Ok(result);
         }
 
-        public async Task<bool> CreateAsync(Tag tag)
+        public async Task<ServiceResult<TagViewModel>> CreateAsync(TagViewModel model)
         {
-            try
+            var tag = _mapper.Map<Tag>(model);
+            
+            var tagDb = _tagRepository.CreateAsync(tag);
+
+            var result = _mapper.Map<TagViewModel>(tagDb);
+
+            return ServiceResult<TagViewModel>.Ok(result);
+        }
+
+        public async Task<ServiceResult<TagViewModel>> UpdateAsync(int id, TagViewModel model)
+        {
+            var tagDb = await _tagRepository.GetByIdAsync(id);
+
+            if (tagDb == null) return ServiceResult<TagViewModel>.NaoEncontrado();
+
+            tagDb.Descricao = model.Descricao;           
+
+            var tagUpdated = _tagRepository.UpdateAsync(tagDb);
+
+            var result = _mapper.Map<TagViewModel>(tagUpdated);
+            return ServiceResult<TagViewModel>.Ok(result);
+        }
+
+        public async Task<ServiceResult<bool>> DeleteAsync(int id)
+        {
+            var tagDb = await _tagRepository.GetByIdAsync(id);
+
+            if (tagDb == null) return ServiceResult<bool>.NaoEncontrado();
+
+            if (tagDb.NoticiaTags.Count > 0) return ServiceResult<bool>.FalhaNegocial("Existem noticias atreladas à tag");
+
+            if (await _tagRepository.DeleteAsync(tagDb))
             {
-                _context.Add(tag);
-                await _context.SaveChangesAsync();
-                return true;
+                return ServiceResult<bool>.Ok(true);
             }
-            catch
+            else
             {
-                return false;
+                return ServiceResult<bool>.Erro("Ocorreu um erro ao excluir");
             }
-        }
-
-        public async Task<bool> UpdateAsync(Tag tag)
-        {
-            try
-            {
-                _context.Update(tag);
-                await _context.SaveChangesAsync();
-                return true;
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!await ExistsAsync(tag.Id))
-                {
-                    return false;
-                }
-                throw;
-            }
-        }
-
-        public async Task<(bool success, string message)> DeleteAsync(int id)
-        {
-            var tag = await _context.Tags
-                .Include(t => t.NoticiaTags)
-                .FirstOrDefaultAsync(t => t.Id == id);
-
-            if (tag == null)
-            {
-                return (false, "Tag não encontrada.");
-            }
-
-            if (tag.NoticiaTags.Any())
-            {
-                return (false, "Não é possível excluir esta tag pois existem notícias associadas a ela.");
-            }
-
-            _context.Tags.Remove(tag);
-            await _context.SaveChangesAsync();
-            return (true, "Tag excluída com sucesso.");
-        }
-
-        public async Task<bool> ExistsAsync(int id)
-        {
-            return await _context.Tags.AnyAsync(e => e.Id == id);
-        }
+        }      
     }
 } 
