@@ -1,10 +1,18 @@
 # tag-news
 
-Sistema WEB MVC para realização de CRUD de Noticias e Tags.
+Sistema ASP.NET MVC com Entity Framework (Model First) e Migrations para realizaÃ§Ã£o de CRUD de Noticias e Tags.
 
-# Pré-requisitos
+### âš™ï¸ PrÃ©-requisitos
 
-Certifique-se de ter os seguintes pré-requisitos instalados em sua máquina:
-
-- .NET 8.0
+- .NET SDK instalado (versÃ£o 8.0)
 - PostgreSQL 17.5
+- String de conexÃ£o ajustada no `appsettings.json`
+
+---
+
+### ğŸš€ Passos para Inicializar o Banco de Dados
+
+1. **Abra o terminal no diretÃ³rio do projeto:**
+
+```bash
+dotnet ef database update
