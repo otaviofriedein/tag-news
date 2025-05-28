@@ -1,9 +1,5 @@
 using AutoMapper;
-using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using tag_news.Data;
 using tag_news.Models;
-using tag_news.Repositories;
 using tag_news.Repositories.Interfaces;
 using tag_news.Services.Intefaces;
 using tag_news.Shared;
