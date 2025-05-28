@@ -1,0 +1,22 @@
+Questões:
+
+1) Qual fluxo os dados de um formulário em uma View deve percorrer até ser armazenado na fonte de dados em um projeto DDD?
+
+Considerando um projeto DDD, os dados gerados por um formulário são enviados à Controller (Camada Presentation), que geralmente contém uma camada de validação utilizando DataAnnotations ou outra biblioteca para validação de dados obrigatórios, tamanho e/ou tipo dos dados, etc. Em seguida, os dados são transferidos para a AppServices (Camada de Application), onde será realizado o mapeamento dos dados para a Entidade. Após mapear para a entidade, os dados seguem para a Service (Camada Domain), onde serão verificadas as regras de negócio antes da persistência. Após a validação de todas as informações anteriores, os dados são enviados ao repositório (Camada Infrastructure) onde será persistida a informação na fonte de dados.
+
+2) Nossa aplicação necessita que um usuário esteja autenticado para poder navegar nas funcionalidades, em .net, como podemos desenvolver essa autenticação?
+
+Em .NET, existem várias formas de realizar a autenticação, a funcionalidade a ser implementada depende da necessidade do cliente.
+Considerando a aplicação desenvolvida neste teste, por se tratar de uma aplicação de pequeno porte, eu sugiro o uso de Autenticação baseada em Cookie.
+É de fácil e rápida implementação, pois não exige alterações na base de dados. Precisaríamos criar uma view, model, controller e service para realizar o CRUD de usuários, e adicionar o atributo "Authorize" nas controlers que devem ser autorizadas. Realizar a implementação o login para verificação de senha, e caso a senha esteja correta, emitir um Cookie de autenticação utilizando o pacote Microsoft.AspNetCore.Authentication. 
+
+3) Estamos enfrentando problemas de performance na pagina inicial de um portal que tem muitos acessos. Essa página exibe eventos separados em 6 sessões do html,
+filtrados, cada sessão, por uma regra de negócio. Trata-se de um projeto MVC, no qual são realizados 6 consultas via ORM para carregar a View que será processada no
+servidor e disponibilizada ao browser. O que podemos fazer para tentar mitigar esse problema de performance?
+
+O cenário de gargalo do servidor é um cenário bem comum em aplicações web.
+A primeira tarefa é analisar separadamente as 6 consultas para identificar possíveis melhorias.
+Para uma solução de curto prazo, caso não impacte regras negociais, o ideal seria separar cada chamada em endpoints diferentes e trabalhar de forma assíncrona.
+Identificar se as queries podem ser otimizadas. Caso as consultas estejam retornando muitos dados, nesse caso a implementação de paginação pode aumentar o tempo de resposta. 
+Outra abordagem que pode ser adotada é implementar cache das informações retornadas pelo backend.
+É importante destacar que a solução a ser implementada depende do cenário atual da aplicação, regras negociais e criticidade.
