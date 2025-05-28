@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using tag_news.Data;
 using tag_news.Models;
+using tag_news.ViewModels;
 
 namespace Noticias.Controllers
 {
@@ -29,7 +30,7 @@ namespace Noticias.Controllers
         public async Task<IActionResult> Create()
         {
             ViewBag.Tags = await _context.Tags.ToListAsync();
-            return View();
+            return View(new NoticiaViewModel { TagIds = new List<int>() });
         }
 
         // POST: Noticia/Create
@@ -43,7 +44,7 @@ namespace Noticias.Controllers
                     Titulo = model.Titulo,
                     Texto = model.Texto,
                     UsuarioId = model.UsuarioId,
-                    NoticiaTags = model.TagIds.Select(tagId => new NoticiaTag { TagId = tagId }).ToList()
+                    NoticiaTags = model.TagIds?.Select(tagId => new NoticiaTag { TagId = tagId }).ToList() ?? new List<NoticiaTag>()
                 };
 
                 _context.Add(noticia);
@@ -70,8 +71,17 @@ namespace Noticias.Controllers
                 return NotFound();
             }
 
+            var viewModel = new NoticiaViewModel
+            {
+                Id = noticia.Id,
+                Titulo = noticia.Titulo,
+                Texto = noticia.Texto,
+                UsuarioId = noticia.UsuarioId,
+                TagIds = noticia.NoticiaTags.Select(nt => nt.TagId).ToList()
+            };
+
             ViewBag.Tags = await _context.Tags.ToListAsync();
-            return View(noticia);
+            return View(viewModel);
         }
 
         // POST: Noticia/Edit/5
@@ -97,7 +107,7 @@ namespace Noticias.Controllers
 
                     // Atualizar tags
                     noticia.NoticiaTags.Clear();
-                    foreach (var tagId in model.TagIds)
+                    foreach (var tagId in model.TagIds ?? new List<int>())
                     {
                         noticia.NoticiaTags.Add(new NoticiaTag { TagId = tagId });
                     }

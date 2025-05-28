@@ -23,7 +23,7 @@ namespace tag_news.Controllers
         // GET: Tag/Create
         public IActionResult Create()
         {
-            return View();
+            return View(new Tag());
         }
 
         // POST: Tag/Create

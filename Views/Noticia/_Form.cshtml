@@ -1,7 +1,10 @@
 @model NoticiaViewModel
 
-<form onsubmit="salvarNoticia(event)" asp-action="Edit">
-    <input type="hidden" asp-for="Id" />
+<form onsubmit="salvarNoticia(event)" asp-action="@(Model.Id == 0 ? "Create" : "Edit")">
+    @if (Model.Id != 0)
+    {
+        <input type="hidden" asp-for="Id" />
+    }
     
     <div class="form-group">
         <label asp-for="Titulo">Título</label>
@@ -20,7 +23,7 @@
         <select multiple class="form-control" name="TagIds">
             @foreach (var tag in ViewBag.Tags)
             {
-                <option value="@tag.Id" selected="@(Model.TagIds.Any(tagId => tagId == tag.Id))">
+                <option value="@tag.Id" selected="@(Model.TagIds != null && Model.TagIds.Contains(tag.Id))">
                     @tag.Descricao
                 </option>
             }
@@ -28,4 +31,4 @@
     </div>
 
     <button type="submit" class="btn btn-primary">Salvar</button>
-</form>
+</form> 
