@@ -27,7 +27,7 @@ namespace tag_news.Services
             return ServiceResult<IEnumerable<TagViewModel>>.Ok(result);
         }
 
-        public async Task<ServiceResult<TagViewModel>?> GetByIdAsync(int id)
+        public async Task<ServiceResult<TagViewModel>> GetByIdAsync(int id)
         {
             var tag = await _tagRepository.GetByIdAsync(id);
 
