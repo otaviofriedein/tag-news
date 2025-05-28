@@ -1,5 +1,9 @@
 @model IEnumerable<NoticiaViewModel>
 
+@{
+    ViewData["Title"] = "Notícias";
+}
+
 <h2>Notícias</h2>
 
 <p>
@@ -106,20 +110,16 @@
             })
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
+                if (data.sucesso) {
                     window.location.reload();
                 } else {
                     // Exibir erros
                     const validationErrors = document.getElementById('validationErrors');
-                    if (data.errors && data.errors.length > 0) {
-                        validationErrors.innerHTML = '<ul>' + 
-                            data.errors.map(error => `<li>${error}</li>`).join('') + 
-                            '</ul>';
-                        validationErrors.classList.remove('d-none');
-                    } else {
-                        validationErrors.innerHTML = `<p>${data.message}</p>`;
-                        validationErrors.classList.remove('d-none');
-                    }
+                   
+                    validationErrors.innerHTML = '<ul>' + 
+                            data.mensagens.map(mensagem => `<li>${mensagem}</li>`).join('') +
+                        '</ul>';
+                    validationErrors.classList.remove('d-none');                   
                 }
             });
         }

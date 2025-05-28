@@ -42,7 +42,7 @@ namespace tag_news.Services
         {
             var tag = _mapper.Map<Tag>(model);
             
-            var tagDb = _tagRepository.CreateAsync(tag);
+            var tagDb = await _tagRepository.CreateAsync(tag);
 
             var result = _mapper.Map<TagViewModel>(tagDb);
 
@@ -57,7 +57,7 @@ namespace tag_news.Services
 
             tagDb.Descricao = model.Descricao;           
 
-            var tagUpdated = _tagRepository.UpdateAsync(tagDb);
+            var tagUpdated = await _tagRepository.UpdateAsync(tagDb);
 
             var result = _mapper.Map<TagViewModel>(tagUpdated);
             return ServiceResult<TagViewModel>.Ok(result);
@@ -69,7 +69,7 @@ namespace tag_news.Services
 
             if (tagDb == null) return ServiceResult<bool>.NaoEncontrado();
 
-            if (tagDb.NoticiaTags.Count > 0) return ServiceResult<bool>.FalhaNegocial("Existem noticias atreladas à tag");
+            if (tagDb.NoticiaTags.Count > 0) return ServiceResult<bool>.FalhaNegocial(["Existem noticias atreladas à Tag."]);
 
             if (await _tagRepository.DeleteAsync(tagDb))
             {
@@ -77,7 +77,7 @@ namespace tag_news.Services
             }
             else
             {
-                return ServiceResult<bool>.Erro("Ocorreu um erro ao excluir");
+                return ServiceResult<bool>.Erro(["Ocorreu um erro ao excluir"]);
             }
         }      
     }

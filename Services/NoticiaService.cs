@@ -48,7 +48,7 @@ namespace tag_news.Services
 
             noticia.NoticiaTags = model.TagIds?.Select(tagId => new NoticiaTag { TagId = tagId }).ToList() ?? [];
 
-            var noticiaDb = _noticiaRepository.CreateAsync(noticia);
+            var noticiaDb = await _noticiaRepository.CreateAsync(noticia);
 
             var result = _mapper.Map<NoticiaViewModel>(noticiaDb);
 
@@ -72,7 +72,7 @@ namespace tag_news.Services
                 noticiaDb.NoticiaTags.Add(new NoticiaTag { TagId = tagId });
             }
 
-            var noticiaUpdated = _noticiaRepository.UpdateAsync(noticiaDb);
+            var noticiaUpdated = await _noticiaRepository.UpdateAsync(noticiaDb);
 
             var result = _mapper.Map<NoticiaViewModel>(noticiaUpdated);
             return ServiceResult<NoticiaViewModel>.Ok(result);
@@ -90,7 +90,7 @@ namespace tag_news.Services
             }
             else
             {
-                return ServiceResult<bool>.Erro("Ocorreu um erro ao excluir");
+                return ServiceResult<bool>.Erro(["Ocorreu um erro ao excluir"]);
             }           
         }
              

@@ -76,7 +76,7 @@ namespace tag_news.Controllers
 
             if (!result.Sucesso)
             {
-                TempData["ErrorMessage"] = result.Mensagem;
+                TempData["ErrorMessage"] = result.Mensagens;
             }
 
             return RedirectToAction(nameof(Index));

@@ -38,7 +38,7 @@ namespace tag_news.Controllers
 
             var result = await _noticiaService.CreateAsync(model);
 
-            if (!result.Sucesso) return Json(ServiceResult<NoticiaViewModel>.FalhaNegocial(result.Mensagem));
+            if (!result.Sucesso) return Json(ServiceResult<NoticiaViewModel>.FalhaNegocial(result.Mensagens));
 
             return Json(ServiceResult<NoticiaViewModel>.Ok(result.Dados));
         }
@@ -66,7 +66,7 @@ namespace tag_news.Controllers
             if (result.StatusCode == StatusCodes.Status404NotFound) 
                 return Json(ServiceResult<NoticiaViewModel>.NaoEncontrado());
 
-            if (!result.Sucesso) return Json(ServiceResult<NoticiaViewModel>.FalhaNegocial(result.Mensagem));
+            if (!result.Sucesso) return Json(ServiceResult<NoticiaViewModel>.FalhaNegocial(result.Mensagens));
 
             return Json(ServiceResult<NoticiaViewModel>.Ok(result.Dados));
         }
@@ -87,10 +87,7 @@ namespace tag_news.Controllers
 
         private JsonResult RetornarErrosModelState()
         {
-            var erros = string.Join(Environment.NewLine, ModelState.Values
-                                                               .SelectMany(v => v.Errors)
-                                                               .Select(e => e.ErrorMessage)
-             );
+            var erros = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToArray();
 
             return Json(ServiceResult<NoticiaViewModel>.FalhaNegocial(erros));
         }
