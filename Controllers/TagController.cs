@@ -35,24 +35,22 @@ namespace tag_news.Controllers
             {
                 _context.Add(tag);
                 await _context.SaveChangesAsync();
+
                 return RedirectToAction(nameof(Index));
             }
+
             return View(tag);
         }
 
         // GET: Tag/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();            
 
             var tag = await _context.Tags.FindAsync(id);
-            if (tag == null)
-            {
-                return NotFound();
-            }
+
+            if (tag == null) return NotFound();            
+
             return View(tag);
         }
 
@@ -61,16 +59,14 @@ namespace tag_news.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Descricao")] Tag tag)
         {
-            if (id != tag.Id)
-            {
-                return NotFound();
-            }
-
+            if (id != tag.Id) return NotFound();
+            
             if (ModelState.IsValid)
             {
                 try
                 {
                     _context.Update(tag);
+
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -98,11 +94,8 @@ namespace tag_news.Controllers
                 .Include(t => t.NoticiaTags)
                 .FirstOrDefaultAsync(t => t.Id == id);
 
-            if (tag == null)
-            {
-                return NotFound();
-            }
-
+            if (tag == null) return NotFound();
+            
             // Verifica se existem notícias associadas à tag
             if (tag.NoticiaTags.Any())
             {
@@ -112,6 +105,7 @@ namespace tag_news.Controllers
 
             _context.Tags.Remove(tag);
             await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Index));
         }
 

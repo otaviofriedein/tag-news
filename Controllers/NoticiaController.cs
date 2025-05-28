@@ -23,6 +23,7 @@ namespace Noticias.Controllers
                 .Include(n => n.NoticiaTags)
                     .ThenInclude(nt => nt.Tag)
                 .ToListAsync();
+
             return View(noticias);
         }
 
@@ -30,7 +31,8 @@ namespace Noticias.Controllers
         public async Task<IActionResult> Create()
         {
             ViewBag.Tags = await _context.Tags.ToListAsync();
-            return View(new NoticiaViewModel { TagIds = new List<int>() });
+            
+            return View(new NoticiaViewModel());
         }
 
         // POST: Noticia/Create
@@ -43,8 +45,8 @@ namespace Noticias.Controllers
                 {
                     Titulo = model.Titulo,
                     Texto = model.Texto,
-                    UsuarioId = model.UsuarioId, // TODO: Não implementado
-                    NoticiaTags = model.TagIds?.Select(tagId => new NoticiaTag { TagId = tagId }).ToList() ?? new List<NoticiaTag>()
+                    UsuarioId = model.UsuarioId, // TODO: Nao implementado
+                    NoticiaTags = model.TagIds?.Select(tagId => new NoticiaTag { TagId = tagId }).ToList() ?? []
                 };
 
                 _context.Add(noticia);
@@ -57,26 +59,20 @@ namespace Noticias.Controllers
         // GET: Noticia/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();            
 
             var noticia = await _context.Noticias
                 .Include(n => n.NoticiaTags)
                 .FirstOrDefaultAsync(n => n.Id == id);
 
-            if (noticia == null)
-            {
-                return NotFound();
-            }
+            if (noticia == null) return NotFound();            
 
             var viewModel = new NoticiaViewModel
             {
                 Id = noticia.Id,
                 Titulo = noticia.Titulo,
                 Texto = noticia.Texto,
-                UsuarioId = noticia.UsuarioId, // TODO: Não implementado
+                UsuarioId = noticia.UsuarioId, // TODO: Nao implementado
                 TagIds = noticia.NoticiaTags.Select(nt => nt.TagId).ToList()
             };
 
@@ -88,11 +84,8 @@ namespace Noticias.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(int id, [FromBody] NoticiaViewModel model)
         {
-            if (id != model.Id)
-            {
-                return NotFound();
-            }
-
+            if (id != model.Id) return NotFound();
+            
             if (ModelState.IsValid)
             {
                 try
@@ -101,9 +94,11 @@ namespace Noticias.Controllers
                         .Include(n => n.NoticiaTags)
                         .FirstOrDefaultAsync(n => n.Id == id);
 
+                    if (noticia == null) return NotFound();
+
                     noticia.Titulo = model.Titulo;
                     noticia.Texto = model.Texto;
-                    noticia.UsuarioId = model.UsuarioId; // TODO: Não implementado
+                    noticia.UsuarioId = model.UsuarioId; // TODO: Nao implementado
 
                     // Atualizar tags
                     noticia.NoticiaTags.Clear();
@@ -136,11 +131,13 @@ namespace Noticias.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var noticia = await _context.Noticias.FindAsync(id);
+
             if (noticia != null)
             {
                 _context.Noticias.Remove(noticia);
                 await _context.SaveChangesAsync();
             }
+
             return RedirectToAction(nameof(Index));
         }
 
