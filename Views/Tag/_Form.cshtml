@@ -1,7 +1,10 @@
 @model Tag
 
 <form asp-action="@(Model.Id == 0 ? "Create" : "Edit")">
-    <input type="hidden" asp-for="Id" />
+    @if (Model.Id != 0)
+    {
+        <input type="hidden" asp-for="Id" />
+    }
     <div class="form-group">
         <label asp-for="Descricao">Descrição</label>
         <input asp-for="Descricao" class="form-control" />
