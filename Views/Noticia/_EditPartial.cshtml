@@ -1,0 +1,31 @@
+@model NoticiaViewModel
+
+<form onsubmit="salvarNoticia(event)" asp-action="Edit">
+    <input type="hidden" asp-for="Id" />
+    
+    <div class="form-group">
+        <label asp-for="Titulo">Título</label>
+        <input asp-for="Titulo" class="form-control" />
+        <span asp-validation-for="Titulo" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Texto">Texto</label>
+        <textarea asp-for="Texto" class="form-control"></textarea>
+        <span asp-validation-for="Texto" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label>Tags</label>
+        <select multiple class="form-control" name="TagIds">
+            @foreach (var tag in ViewBag.Tags)
+            {
+                <option value="@tag.Id" selected="@(Model.TagIds.Any(tagId => tagId == tag.Id))">
+                    @tag.Descricao
+                </option>
+            }
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Salvar</button>
+</form>

@@ -1,0 +1,93 @@
+@model IEnumerable<Noticia>
+
+<h2>Notícias</h2>
+
+<p>
+    <button class="btn btn-primary" onclick="carregarModalCriar()">Nova Notícia</button>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Título</th>
+            <th>Autor</th>
+            <th>Tags</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Titulo</td>
+                <td>@item.Usuario.Nome</td>
+                <td>
+                    @string.Join(", ", item.NoticiaTags.Select(nt => nt.Tag.Descricao))
+                </td>
+                <td>
+                    <button class="btn btn-warning" onclick="carregarModalEditar(@item.Id)">Editar</button>
+                    <form asp-action="Delete" asp-route-id="@item.Id" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Tem certeza que deseja excluir?')">Excluir</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Modal para Criar/Editar -->
+<div class="modal fade" id="noticiaModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Nova Notícia</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Conteúdo será carregado via AJAX -->
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function carregarModalCriar() {
+            fetch('@Url.Action("Create")')
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('modalBody').innerHTML = html;
+                    new bootstrap.Modal(document.getElementById('noticiaModal')).show();
+                });
+        }
+
+        function carregarModalEditar(id) {
+            fetch(`@Url.Action("Edit")/${id}`)
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('modalBody').innerHTML = html;
+                    new bootstrap.Modal(document.getElementById('noticiaModal')).show();
+                });
+        }
+
+        function salvarNoticia(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    // Exibir erros
+                    alert('Erro ao salvar: ' + JSON.stringify(data.errors));
+                }
+            });
+        }
+    </script>
+}
