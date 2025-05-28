@@ -12,7 +12,16 @@ Sistema ASP.NET MVC com Entity Framework (Model First) e Migrations para realiza
 
 ### 🚀 Passos para Inicializar o Banco de Dados
 
-1. **Abra o terminal no diretório do projeto:**
+1. **Abra o terminal no diretório do projeto**
+
+2. **Instale a ferramenta do Entity Framework:**
+
+```bash
+dotnet tool install --global dotnet-ef
+```
+
+3. **Crie o banco de dados no Postgresql:**
 
 ```bash
 dotnet ef database update
+```
