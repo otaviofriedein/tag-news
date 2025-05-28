@@ -1,6 +1,4 @@
-﻿using System.Net;
-
-namespace tag_news.Shared
+﻿namespace tag_news.Shared
 {
     public class ServiceResult<T>
     {

@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using tag_news.Services.Intefaces;
 using tag_news.Shared;
-using tag_news.ViewModels;
 
 namespace tag_news.Controllers
 {

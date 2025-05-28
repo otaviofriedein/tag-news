@@ -2,8 +2,6 @@
 using tag_news.Data;
 using tag_news.Models;
 using tag_news.Repositories.Interfaces;
-using tag_news.Shared;
-using tag_news.ViewModels;
 
 namespace tag_news.Repositories
 {
