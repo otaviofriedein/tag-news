@@ -43,7 +43,7 @@ namespace Noticias.Controllers
                 {
                     Titulo = model.Titulo,
                     Texto = model.Texto,
-                    UsuarioId = model.UsuarioId,
+                    UsuarioId = model.UsuarioId, // TODO: Não implementado
                     NoticiaTags = model.TagIds?.Select(tagId => new NoticiaTag { TagId = tagId }).ToList() ?? new List<NoticiaTag>()
                 };
 
@@ -76,7 +76,7 @@ namespace Noticias.Controllers
                 Id = noticia.Id,
                 Titulo = noticia.Titulo,
                 Texto = noticia.Texto,
-                UsuarioId = noticia.UsuarioId,
+                UsuarioId = noticia.UsuarioId, // TODO: Não implementado
                 TagIds = noticia.NoticiaTags.Select(nt => nt.TagId).ToList()
             };
 
@@ -103,7 +103,7 @@ namespace Noticias.Controllers
 
                     noticia.Titulo = model.Titulo;
                     noticia.Texto = model.Texto;
-                    noticia.UsuarioId = model.UsuarioId;
+                    noticia.UsuarioId = model.UsuarioId; // TODO: Não implementado
 
                     // Atualizar tags
                     noticia.NoticiaTags.Clear();

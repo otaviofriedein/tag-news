@@ -20,7 +20,7 @@
         {
             <tr>
                 <td>@item.Titulo</td>
-                <td>@item.Usuario.Nome</td>
+                <td>@item.Usuario?.Nome</td>
                 <td>
                     @string.Join(", ", item.NoticiaTags.Select(nt => nt.Tag.Descricao))
                 </td>
@@ -75,9 +75,34 @@
             const form = event.target;
             const formData = new FormData(form);
 
+            // Limpar TagIds existentes
+            formData.delete('TagIds');
+
+            // Adicionar apenas os checkboxes marcados
+            const checkboxes = form.querySelectorAll('input[name="TagIds"]:checked');
+            checkboxes.forEach(checkbox => {
+                formData.append('TagIds', checkbox.value);
+            });
+
+            // Converter FormData para objeto
+            const data = {};
+            formData.forEach((value, key) => {
+                if (key === 'TagIds') {
+                    if (!data[key]) {
+                        data[key] = [];
+                    }
+                    data[key].push(value);
+                } else {
+                    data[key] = value;
+                }
+            });
+
             fetch(form.action, {
                 method: 'POST',
-                body: formData
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
             })
             .then(response => response.json())
             .then(data => {

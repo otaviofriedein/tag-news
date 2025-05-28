@@ -94,12 +94,24 @@ namespace tag_news.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var tag = await _context.Tags.FindAsync(id);
-            if (tag != null)
+            var tag = await _context.Tags
+                .Include(t => t.NoticiaTags)
+                .FirstOrDefaultAsync(t => t.Id == id);
+
+            if (tag == null)
             {
-                _context.Tags.Remove(tag);
-                await _context.SaveChangesAsync();
+                return NotFound();
             }
+
+            // Verifica se existem notícias associadas à tag
+            if (tag.NoticiaTags.Any())
+            {
+                TempData["ErrorMessage"] = "Não é possível excluir esta tag pois existem notícias associadas a ela.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            _context.Tags.Remove(tag);
+            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

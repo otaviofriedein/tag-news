@@ -20,15 +20,25 @@
 
     <div class="form-group">
         <label>Tags</label>
-        <select multiple class="form-control" name="TagIds">
+        <div class="row">
             @foreach (var tag in ViewBag.Tags)
             {
-                <option value="@tag.Id" selected="@(Model.TagIds != null && Model.TagIds.Contains(tag.Id))">
-                    @tag.Descricao
-                </option>
+                <div class="col-md-4 mb-2">
+                    <div class="form-check">
+                        <input class="form-check-input" 
+                               type="checkbox" 
+                               name="TagIds" 
+                               value="@tag.Id" 
+                               id="tag_@tag.Id"
+                               @(Model.TagIds != null && Model.TagIds.Contains(tag.Id) ? "checked" : "") />
+                        <label class="form-check-label" for="tag_@tag.Id">
+                            @tag.Descricao
+                        </label>
+                    </div>
+                </div>
             }
-        </select>
+        </div>
     </div>
-
+    <br />
     <button type="submit" class="btn btn-primary">Salvar</button>
 </form> 
