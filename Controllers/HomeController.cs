@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
-using tag_news.Models;
+using tag_news.ViewModels;
 
 namespace tag_news.Controllers
 {

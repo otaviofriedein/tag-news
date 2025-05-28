@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using tag_news.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 

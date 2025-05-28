@@ -1,7 +1,10 @@
-public class Tag
+namespace tag_news.Models
 {
-    public int Id { get; set; }
-    public string Descricao { get; set; }
+    public class Tag
+    {
+        public int Id { get; set; }
+        public string Descricao { get; set; }
 
-    public ICollection<NoticiaTag> NoticiaTags { get; set; }
+        public ICollection<NoticiaTag> NoticiaTags { get; set; }
+    }
 }

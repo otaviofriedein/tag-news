@@ -1,4 +1,4 @@
-namespace tag_news.Models
+namespace tag_news.ViewModels
 {
     public class ErrorViewModel
     {
