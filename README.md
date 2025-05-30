@@ -25,3 +25,7 @@ dotnet tool install --global dotnet-ef
 ```bash
 dotnet ef database update
 ```
+
+---
+
+-> Acesse o [Repositório GitHub](https://github.com/otaviofriedein/tag-news).

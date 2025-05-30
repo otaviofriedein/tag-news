@@ -34,13 +34,13 @@ namespace tag_news.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] NoticiaViewModel model)
         {
-            if (!ModelState.IsValid) return RetornarErrosModelState();            
+            if (!ModelState.IsValid) return RetornarErrosModelState();
 
             var result = await _noticiaService.CreateAsync(model);
 
-            if (!result.Sucesso) return Json(ServiceResult<NoticiaViewModel>.FalhaNegocial(result.Mensagens));
+            if (!result.Sucesso) return BadRequest(ServiceResult<NoticiaViewModel>.FalhaNegocial(result.Mensagens));
 
-            return Json(ServiceResult<NoticiaViewModel>.Ok(result.Dados));
+            return Ok(ServiceResult<NoticiaViewModel>.Ok(result.Dados));
         }
 
         [HttpGet]
@@ -64,11 +64,11 @@ namespace tag_news.Controllers
             var result = await _noticiaService.UpdateAsync(id, model);
 
             if (result.StatusCode == StatusCodes.Status404NotFound) 
-                return Json(ServiceResult<NoticiaViewModel>.NaoEncontrado());
+                return NotFound(ServiceResult<NoticiaViewModel>.NaoEncontrado());
 
-            if (!result.Sucesso) return Json(ServiceResult<NoticiaViewModel>.FalhaNegocial(result.Mensagens));
+            if (!result.Sucesso) return BadRequest(ServiceResult<NoticiaViewModel>.FalhaNegocial(result.Mensagens));
 
-            return Json(ServiceResult<NoticiaViewModel>.Ok(result.Dados));
+            return Ok(ServiceResult<NoticiaViewModel>.Ok(result.Dados));
         }
 
         [HttpPost, ActionName("Delete")]
@@ -85,11 +85,11 @@ namespace tag_news.Controllers
 
         }
 
-        private JsonResult RetornarErrosModelState()
+        private ObjectResult RetornarErrosModelState()
         {
             var erros = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToArray();
 
-            return Json(ServiceResult<NoticiaViewModel>.FalhaNegocial(erros));
+            return BadRequest(ServiceResult<NoticiaViewModel>.FalhaNegocial(erros));
         }
     }
 }

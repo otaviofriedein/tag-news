@@ -108,20 +108,44 @@
                 },
                 body: JSON.stringify(data)
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.sucesso) {
-                    window.location.reload();
-                } else {
-                    // Exibir erros
-                    const validationErrors = document.getElementById('validationErrors');
-                   
-                    validationErrors.innerHTML = '<ul>' + 
-                            data.mensagens.map(mensagem => `<li>${mensagem}</li>`).join('') +
-                        '</ul>';
-                    validationErrors.classList.remove('d-none');                   
-                }
-            });
+                .then(async response => {
+                    const contentType = response.headers.get('Content-Type');
+
+                    if (!response.ok) {
+                        // Se a resposta não for 2xx, tenta extrair o JSON com mensagens
+                        if (contentType && contentType.includes('application/json')) {
+                            const errorData = await response.json();
+                            throw errorData;
+                        } else {
+                            throw { mensagens: ['Ocorreu um erro inesperado.'] };
+                        }
+                    }
+
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.sucesso) {
+                        window.location.reload();
+                    } else {
+                        exibirErros(data.mensagens);
+                    }
+                })
+                .catch(error => {
+                    // Trata erros de rede ou erros 4xx/5xx com mensagens
+                    if (error.mensagens) {
+                        exibirErros(error.mensagens);
+                    } else {
+                        exibirErros(['Erro inesperado ao processar a requisição.']);
+                    }
+                });
+        }
+
+        function exibirErros(mensagens) {
+            const validationErrors = document.getElementById('validationErrors');
+            validationErrors.innerHTML = '<ul>' +
+                mensagens.map(mensagem => `<li>${mensagem}</li>`).join('') +
+                '</ul>';
+            validationErrors.classList.remove('d-none');
         }
     </script>
 }
