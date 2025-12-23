@@ -1,6 +1,6 @@
 # tag-news
 
-Sistema ASP.NET MVC com Entity Framework (Model First) e Migrations para realização de CRUD de Noticias e Tags.
+Sistema ASP.NET MVC com Entity Framework (Code First), usando AppDbContext e Fluent API para as configurações, com Migrations para realização de CRUD de Noticias e Tags.
 
 ### ⚙️ Pré-requisitos
 
